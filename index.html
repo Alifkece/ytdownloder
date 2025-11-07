@@ -5,41 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>YouTube Downloader & Player</title>
 <style>
-/* Import font Honk */
 @import url('https://fonts.cdnfonts.com/css/honk');
 
-/* Reset & font */
 body, html { margin:0; padding:0; font-family: Arial, sans-serif; height: 100%; overflow: hidden; }
-
-/* Judul pakai Honk */
-h1.honk { 
-  font-family: "Honk", system-ui;
-  font-variation-settings: "MORF" 15, "SHLN" 50;
-  color: #ff4444;
-  text-shadow: 2px 2px 5px #000;
-}
-
-/* Background video */
+h1.honk { font-family: "Honk", system-ui; font-variation-settings: "MORF" 15, "SHLN" 50; color: #ff4444; text-shadow: 2px 2px 5px #000; }
 #bg-video { position: fixed; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: -2; }
-
-/* Overlay supaya teks terbaca */
 #overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); z-index: -1; }
-
-/* Konten utama */
 #main { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; color: #fff; padding: 20px; height: 100%; overflow-y: auto; }
-
 input[type="text"] { width: 60%; padding: 10px; border-radius: 5px; border: none; }
 button { padding: 10px 15px; margin-left: 5px; border: none; border-radius: 5px; cursor: pointer; background: #ff4444; color: #fff; }
-
 .search-result-item { display: flex; align-items: center; margin-top: 10px; padding: 5px; background: rgba(0,0,0,0.5); border-radius: 5px; cursor: pointer; transition: 0.2s; }
 .search-result-item:hover { background: rgba(255,68,68,0.6); }
 .search-result-item img { width: 80px; height: 60px; object-fit: cover; margin-right: 10px; border-radius: 3px; }
 .search-result-info h5 { margin: 0; font-size: 14px; }
-
 #youtubePlayer { margin-top: 20px; display: none; flex-direction: column; align-items: center; }
 #youtubePlayer.active { display: flex; }
 audio { width: 100%; margin-top: 10px; }
-
 #youtubeStatus { margin-top: 10px; }
 #popup { position: fixed; top: 20px; right: 20px; background: #ff4444; color: #fff; padding: 10px; border-radius: 5px; display: none; }
 </style>
@@ -141,6 +122,13 @@ async function playYoutubeMusic(data) {
         currentYoutubeAudio = youtubeAudio;
         currentYoutubeData = data;
 
+        youtubeAudio.src = audioUrl;
+        youtubeAudio.load();
+
+        // Auto play
+        await youtubeAudio.play().catch(()=>{});
+        youtubePlayPauseBtn.textContent = "Pause";
+
         youtubeTitle.textContent = data.title;
         youtubePlayer.classList.add("active");
         youtubeStatus.innerHTML = `Siap diputar: ${data.title}`;
@@ -153,7 +141,7 @@ async function playYoutubeMusic(data) {
 function toggleYoutubePlayPause() {
     if (!currentYoutubeAudio) return;
     if (currentYoutubeAudio.paused) {
-        currentYoutubeAudio.play();
+        currentYoutubeAudio.play().catch(()=>{});
         youtubePlayPauseBtn.textContent = "Pause";
     } else {
         currentYoutubeAudio.pause();
@@ -162,9 +150,11 @@ function toggleYoutubePlayPause() {
 }
 
 function downloadYoutubeMusic() {
-    if (!currentYoutubeAudio || !currentYoutubeData) return showYoutubePopup("Error", "Tidak ada lagu yang sedang diputar");
+    if (!currentYoutubeAudio || !currentYoutubeData || !youtubeAudio.src) 
+        return showYoutubePopup("Error", "Tidak ada lagu yang sedang diputar");
+
     const link = document.createElement('a');
-    link.href = currentYoutubeAudio.src;
+    link.href = youtubeAudio.src;
     link.download = `${currentYoutubeData.title}.mp3`;
     document.body.appendChild(link);
     link.click();
@@ -180,3 +170,4 @@ youtubeDownloadBtn.addEventListener('click', downloadYoutubeMusic);
 
 </body>
 </html>
+
