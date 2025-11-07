@@ -6,80 +6,183 @@
 <title>YouTube Downloader & Player | Aliftzy</title>
 <style>
 @import url('https://fonts.cdnfonts.com/css/honk');
+body, html {
+  margin:0; padding:0;
+  font-family: Arial, sans-serif;
+  height: 100%;
+  overflow-x: hidden;
+  background:#000;
+  color:#fff;
+}
+h1.honk {
+  font-family: "Honk", system-ui;
+  color: #00bfff;
+  text-shadow: 2px 2px 5px #000;
+  text-align:center;
+  margin-top:20px;
+}
 
-/* Reset & font */
-body, html { margin:0; padding:0; font-family: Arial, sans-serif; height: 100%; overflow-x: hidden; background:#000; color:#fff; }
-h1.honk { font-family: "Honk", system-ui; color: #00bfff; text-shadow: 2px 2px 5px #000; text-align:center; margin-top:20px; }
+#bg-video {
+  position: fixed; top:0; left:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  z-index: -2;
+}
+#overlay {
+  position: fixed; top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.5);
+  z-index: -1;
+}
 
-/* Background video */
-#bg-video { position: fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index: -2; }
-#overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: -1; }
+/* --- Profile Video --- */
+#profile-container {
+  display:flex; flex-direction:column;
+  align-items:center;
+  margin-top:20px;
+  z-index:1;
+}
+#profile-video {
+  width:120px; height:120px;
+  border-radius:50%;
+  overflow:hidden;
+  box-shadow:0 0 20px #00bfff;
+  margin-bottom:10px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  animation: float 3s ease-in-out infinite;
+}
+#profile-video video{
+  width:100%; height:100%;
+  object-fit:cover;
+  aspect-ratio:1/1;
+  border-radius:50%;
+}
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
 
-/* Profile */
-#profile-container { display:flex; flex-direction:column; align-items:center; margin-top:20px; z-index:1; }
-#profile-video { width:100px; height:100px; border-radius:50%; overflow:hidden; box-shadow:0 0 20px #00bfff; margin-bottom:10px; }
-#profile-video video{ width:100%; height:100%; object-fit:cover; }
-
-/* Main content */
+/* --- Search bar and Player UI --- */
 #main { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; color: #fff; padding: 10px; }
 
-/* Search bar */
 .search-bar {
   display:flex;
-  width: 90%;
-  max-width: 400px;
+  width: 90%; max-width: 400px;
   border: 2px solid #00bfff;
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 15px;
 }
 .search-bar input[type="text"] {
-  flex:1;
-  padding:10px;
-  border:none;
-  outline:none;
+  flex:1; padding:10px;
+  border:none; outline:none;
   background:transparent;
-  color:#fff;
-  font-size:14px;
+  color:#fff; font-size:14px;
 }
 .search-bar button {
   padding: 0 15px;
-  background:#00bfff;
-  color:#000;
-  border:none;
-  border-left:2px solid #fff;
-  font-weight:bold;
-  cursor:pointer;
+  background:#00bfff; color:#000;
+  border:none; border-left:2px solid #fff;
+  font-weight:bold; cursor:pointer;
   transition:0.3s;
 }
 .search-bar button:hover { background:#1ed760; color:#fff; }
 
-/* Search results */
-.search-result-item { display:flex; align-items:center; margin-top:8px; padding:5px; background: rgba(0,0,40,0.5); border-radius:5px; cursor:pointer; transition:0.2s; }
-.search-result-item:hover { background: rgba(0,191,255,0.6); transform: scale(1.02);}
-.search-result-item img { width:80px; height:60px; object-fit:cover; margin-right:10px; border-radius:5px; }
-.search-result-info h5 { margin:0; font-size:13px; color:#00bfff; word-break: break-word; }
+.search-result-item {
+  display:flex; align-items:center;
+  margin-top:8px; padding:5px;
+  background: rgba(0,0,40,0.5);
+  border-radius:5px; cursor:pointer;
+  transition:0.2s;
+}
+.search-result-item:hover {
+  background: rgba(0,191,255,0.6);
+  transform: scale(1.02);
+}
+.search-result-item img {
+  width:80px; height:60px;
+  object-fit:cover;
+  margin-right:10px; border-radius:5px;
+}
+.search-result-info h5 {
+  margin:0; font-size:13px;
+  color:#00bfff;
+  word-break: break-word;
+}
 
-/* Player */
-#youtubePlayer { display:none; flex-direction: column; align-items:center; background: rgba(0,15,40,0.9); padding:10px; border-radius:20px; box-shadow:0 0 20px rgba(0,191,255,0.5); width:95%; max-width:360px; margin-bottom:20px;}
+#youtubePlayer {
+  display:none;
+  flex-direction: column;
+  align-items:center;
+  background: rgba(0,15,40,0.9);
+  padding:10px; border-radius:20px;
+  box-shadow:0 0 20px rgba(0,191,255,0.5);
+  width:95%; max-width:360px;
+  margin-bottom:20px;
+}
 #youtubePlayer.active{display:flex;}
 #youtubeTitle { font-size:14px; color:#00bfff; text-align:center; margin-bottom:5px; word-break:break-word;}
 #youtubeTime { font-size:12px; color:#00bfff; text-align:center; margin-bottom:5px; }
 
 .player-controls { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; width:100%; margin-bottom:5px;}
-.play-btn, #youtubeDownloadBtn { padding:8px 12px; border-radius:10px; font-size:13px; font-weight:bold; cursor:pointer; background:#00bfff; color:#000; border:none; transition:0.3s; }
+.play-btn, #youtubeDownloadBtn {
+  padding:8px 12px; border-radius:10px;
+  font-size:13px; font-weight:bold;
+  cursor:pointer;
+  background:#00bfff; color:#000; border:none;
+  transition:0.3s;
+}
 .play-btn:hover, #youtubeDownloadBtn:hover { background:#1ed760; color:#fff; }
 
-.timeline { width:100%; height:10px; background: rgba(0,191,255,0.2); border-radius:5px; cursor:pointer; position:relative; margin-bottom:5px;}
-.timeline-progress { height:100%; width:0%; background:#00bfff; border-radius:5px; box-shadow:0 0 10px #00bfff; }
+.timeline {
+  width:100%; height:10px;
+  background: rgba(0,191,255,0.2);
+  border-radius:5px; cursor:pointer;
+  position:relative; margin-bottom:5px;
+}
+.timeline-progress {
+  height:100%; width:0%;
+  background:#00bfff;
+  border-radius:5px;
+  box-shadow:0 0 10px #00bfff;
+}
 
-.equalizer { display:flex; align-items:flex-end; justify-content:center; gap:3px; height:18px; margin-bottom:5px;}
-.bar { width:4px; background:#00bfff; border-radius:3px; box-shadow:0 0 8px #00bfff; animation:bounce 1s infinite ease-in-out paused;}
-.bar:nth-child(1){animation-delay:0s;} .bar:nth-child(2){animation-delay:0.15s;} .bar:nth-child(3){animation-delay:0.3s;} .bar:nth-child(4){animation-delay:0.45s;} .bar:nth-child(5){animation-delay:0.6s;}
-@keyframes bounce{0%,100%{height:4px;opacity:0.5;}50%{height:18px;opacity:1;}}
+.equalizer {
+  display:flex; align-items:flex-end;
+  justify-content:center; gap:3px;
+  height:18px; margin-bottom:5px;
+}
+.bar {
+  width:4px; background:#00bfff;
+  border-radius:3px;
+  box-shadow:0 0 8px #00bfff;
+  animation:bounce 1s infinite ease-in-out paused;
+}
+.bar:nth-child(1){animation-delay:0s;}
+.bar:nth-child(2){animation-delay:0.15s;}
+.bar:nth-child(3){animation-delay:0.3s;}
+.bar:nth-child(4){animation-delay:0.45s;}
+.bar:nth-child(5){animation-delay:0.6s;}
+@keyframes bounce{
+  0%,100%{height:4px;opacity:0.5;}
+  50%{height:18px;opacity:1;}
+}
 
 #youtubeStatus { margin-bottom:10px; text-align:center; color:#00bfff; }
-#popup { position: fixed; top: 15px; right: 15px; background:#00bfff; color:#000; padding:8px; border-radius:5px; display:none;}
+#popup {
+  position: fixed; top: 15px; right: 15px;
+  background:#00bfff; color:#000;
+  padding:8px 10px; border-radius:8px;
+  display:none; font-weight:bold;
+  box-shadow:0 0 15px #00bfff;
+  animation: fadein 0.25s ease;
+}
+@keyframes fadein {
+  from{opacity:0; transform:translateY(-10px);}
+  to{opacity:1; transform:translateY(0);}
+}
 
 @media screen and (max-width:480px){
   .search-bar{width:95%;}
@@ -131,7 +234,7 @@ h1.honk { font-family: "Honk", system-ui; color: #00bfff; text-shadow: 2px 2px 5
       <div class="equalizer" id="equalizer">
         <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
       </div>
-      <audio id="youtubeAudio"></audio>
+      <audio id="youtubeAudio" preload="auto"></audio>
     </div>
   </div>
 </div>
@@ -157,18 +260,21 @@ const popup = document.getElementById('popup');
 let currentYoutubeAudio = null;
 let currentYoutubeData = null;
 
-function showYoutubePopup(title,message){
-  popup.innerHTML=`<strong>${title}</strong><br>${message}`;
-  popup.style.display='block';
-  setTimeout(()=>{popup.style.display='none';},2500);
+function showYoutubePopup(title, message){
+  popup.innerHTML = `<strong>${title}</strong><br>${message}`;
+  popup.style.display = 'block';
+  if (popup._hideTimer) clearTimeout(popup._hideTimer);
+  popup._hideTimer = setTimeout(()=>{ popup.style.display='none'; }, 2500);
 }
 
+/* --- Search function --- */
 async function searchYoutube(){
   const query = youtubeQuery.value.trim();
   if(!query) return showYoutubePopup("Error","Masukkan kata kunci dulu!");
   youtubeStatus.innerHTML = 'Mencari…';
   youtubeResults.innerHTML = '';
   youtubePlayer.classList.remove('active');
+
   try{
     const res = await fetch(`https://api.siputzx.my.id/api/s/youtube?query=${encodeURIComponent(query)}`);
     const data = await res.json();
@@ -176,72 +282,128 @@ async function searchYoutube(){
     if(!results || !results.length){ youtubeStatus.innerHTML='Tidak ada hasil ditemukan'; return; }
     youtubeStatus.innerHTML = `Ditemukan ${results.length} hasil`;
     youtubeResults.innerHTML = '';
-    results.forEach(res=>{
-      // Periksa semua kemungkinan thumbnail dan fallback
-      const thumb = res.thumbnail?.url || res.thumbnails?.[0]?.url || res.thumbnail || "https://via.placeholder.com/80x60?text=No+Thumb";
+    showYoutubePopup("Success","Found " + results.length + " songs 🔥");
+    results.forEach(itemData=>{
+      const thumb = itemData.thumbnail?.url || itemData.thumbnails?.[0]?.url || itemData.thumbnail || "https://via.placeholder.com/80x60?text=No+Thumb";
       const item = document.createElement("div");
       item.className = "search-result-item";
-      item.innerHTML = `<img src="${thumb}" alt="thumb"><div class="search-result-info"><h5>${res.title}</h5></div>`;
-      item.addEventListener('click',()=>playYoutubeMusic(res));
+      item.innerHTML = `<img src="${thumb}" alt="thumb"><div class="search-result-info"><h5>${itemData.title}</h5></div>`;
+      item.addEventListener('click', ()=> playYoutubeMusic(itemData));
       youtubeResults.appendChild(item);
     });
-  }catch(err){ console.error(err); youtubeStatus.innerHTML = `Gagal mencari: ${err.message}`; }
+  }catch(err){
+    console.error(err);
+    youtubeStatus.innerHTML = `Gagal mencari: ${err.message}`;
+  }
 }
 
+/* --- Play audio --- */
 async function playYoutubeMusic(data){
-  youtubeStatus.innerHTML='Mengambil audio…';
+  youtubeAudio.pause();
+  youtubeAudio.removeAttribute('src');
+  youtubeAudio.load();
+  youtubeStatus.innerHTML = 'Mengambil audio…';
+  youtubePlayer.classList.remove('active');
+
   try{
     const res = await fetch(`https://restapi-v2.simplebot.my.id/download/ytmp3?url=${encodeURIComponent(data.url)}`);
     const js = await res.json();
     const audioUrl = js?.result;
     if(!audioUrl) throw new Error("URL audio tidak ditemukan");
+
     currentYoutubeAudio = youtubeAudio;
     currentYoutubeData = data;
     youtubeAudio.src = audioUrl;
     youtubeAudio.load();
-    await youtubeAudio.play().catch(()=>{});
-    youtubePlayPauseBtn.textContent='Pause';
-    youtubeTitle.textContent=data.title;
-    youtubePlayer.classList.add('active');
-    bars.forEach(bar=>bar.style.animationPlayState='running');
+    youtubeTitle.textContent = data.title;
+
+    const updateReady = () => {
+      youtubeStatus.innerHTML = `Playing: ${data.title}`;
+      showYoutubePopup("🎶 " + data.title, "ready to play!");
+      youtubePlayer.classList.add('active');
+      bars.forEach(bar => bar.style.animationPlayState = 'running');
+    };
+
+    youtubeAudio.addEventListener('canplaythrough', () => {
+      youtubeAudio.play().then(updateReady).catch(updateReady);
+    }, { once:true });
+
+    youtubeAudio.addEventListener('playing', updateReady, { once:true });
+
     updateProgress();
-  }catch(err){ youtubeStatus.innerHTML=`Gagal memutar: ${err.message}`; console.error(err);}
+  }catch(err){
+    youtubeStatus.innerHTML = `Gagal memutar: ${err.message}`;
+    console.error(err);
+  }
 }
 
+/* --- Controls --- */
 function toggleYoutubePlayPause(){
   if(!currentYoutubeAudio) return;
-  if(currentYoutubeAudio.paused){ currentYoutubeAudio.play().catch(()=>{}); youtubePlayPauseBtn.textContent='Pause'; bars.forEach(bar=>bar.style.animationPlayState='running'); }
-  else { currentYoutubeAudio.pause(); youtubePlayPauseBtn.textContent='Play'; bars.forEach(bar=>bar.style.animationPlayState='paused'); }
+  if(currentYoutubeAudio.paused){
+    currentYoutubeAudio.play();
+    youtubePlayPauseBtn.textContent='Pause';
+    youtubeStatus.innerHTML = `Playing: ${currentYoutubeData?.title}`;
+    bars.forEach(bar=>bar.style.animationPlayState='running');
+  } else {
+    currentYoutubeAudio.pause();
+    youtubePlayPauseBtn.textContent='Play';
+    youtubeStatus.innerHTML = `Paused: ${currentYoutubeData?.title}`;
+    bars.forEach(bar=>bar.style.animationPlayState='paused');
+  }
 }
-
 function downloadYoutubeMusic(){
-  if(!currentYoutubeAudio || !currentYoutubeData || !youtubeAudio.src) return showYoutubePopup("Error","Tidak ada lagu yang sedang diputar");
+  if(!currentYoutubeAudio || !youtubeAudio.src) return showYoutubePopup("Error","Tidak ada lagu yang sedang diputar");
   const link = document.createElement('a');
   link.href = youtubeAudio.src;
   link.download = `${currentYoutubeData.title}.mp3`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  showYoutubePopup("Berhasil",`Mengunduh: ${currentYoutubeData.title}`);
+  showYoutubePopup("Downloaded", currentYoutubeData.title);
 }
 
+/* --- Timeline --- */
 timeline.addEventListener('click', e=>{
-  if(!currentYoutubeAudio) return;
+  if(!currentYoutubeAudio || isNaN(currentYoutubeAudio.duration)) return;
   const rect = timeline.getBoundingClientRect();
   const percent = (e.clientX - rect.left)/rect.width;
-  currentYoutubeAudio.currentTime = percent*currentYoutubeAudio.duration;
+  currentYoutubeAudio.currentTime = percent * currentYoutubeAudio.duration;
 });
 
 youtubeAudio.addEventListener('timeupdate', updateProgress);
+youtubeAudio.addEventListener('ended', ()=>{
+  youtubePlayPauseBtn.textContent='Play';
+  youtubeStatus.innerHTML = `Ended: ${currentYoutubeData?.title}`;
+  bars.forEach(bar=>bar.style.animationPlayState='paused');
+});
+youtubeAudio.addEventListener('pause', ()=>{
+  if(!youtubeAudio.ended){
+    youtubePlayPauseBtn.textContent='Play';
+    youtubeStatus.innerHTML = `Paused: ${currentYoutubeData?.title}`;
+    bars.forEach(bar=>bar.style.animationPlayState='paused');
+  }
+});
+
 function updateProgress(){
-  if(!currentYoutubeAudio) return;
-  progress.style.width = (currentYoutubeAudio.currentTime/currentYoutubeAudio.duration)*100+'%';
+  if(!currentYoutubeAudio || isNaN(currentYoutubeAudio.duration)) {
+    progress.style.width = '0%';
+    youtubeTime.textContent = '00:00 / 00:00';
+    return;
+  }
+  const pct = (currentYoutubeAudio.currentTime / currentYoutubeAudio.duration) * 100;
+  progress.style.width = pct + '%';
   youtubeTime.textContent = `${formatTime(currentYoutubeAudio.currentTime)} / ${formatTime(currentYoutubeAudio.duration)}`;
 }
-function formatTime(s){ if(isNaN(s)) return "00:00"; const m=Math.floor(s/60); const sec=Math.floor(s%60); return `${m<10?'0':''}${m}:${sec<10?'0':''}${sec}`;}
+function formatTime(s){
+  if(isNaN(s)) return "00:00";
+  const m=Math.floor(s/60); const sec=Math.floor(s%60);
+  return `${m<10?'0':''}${m}:${sec<10?'0':''}${sec}`;
+}
 
+/* --- Event listeners --- */
 searchYoutubeBtn.addEventListener('click', searchYoutube);
-youtubeQuery.addEventListener('keypress', e=>{if(e.key==='Enter') searchYoutube();});
+youtubeQuery.addEventListener('keypress', e=>{ if(e.key==='Enter') searchYoutube(); });
 youtubePlayPauseBtn.addEventListener('click', toggleYoutubePlayPause);
 youtubeDownloadBtn.addEventListener('click', downloadYoutubeMusic);
 </script>
