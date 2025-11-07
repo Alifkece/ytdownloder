@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Downloader & Player</title>
+<style>
+/* Import font Honk */
+@import url('https://fonts.cdnfonts.com/css/honk');
+
+/* Reset & font */
+body, html { margin:0; padding:0; font-family: Arial, sans-serif; height: 100%; overflow: hidden; }
+
+/* Judul pakai Honk */
+h1.honk { 
+  font-family: "Honk", system-ui;
+  font-variation-settings: "MORF" 15, "SHLN" 50;
+  color: #ff4444;
+  text-shadow: 2px 2px 5px #000;
+}
+
+/* Background video */
+#bg-video { position: fixed; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index: -2; }
+
+/* Overlay supaya teks terbaca */
+#overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); z-index: -1; }
+
+/* Konten utama */
+#main { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; color: #fff; padding: 20px; height: 100%; overflow-y: auto; }
+
+input[type="text"] { width: 60%; padding: 10px; border-radius: 5px; border: none; }
+button { padding: 10px 15px; margin-left: 5px; border: none; border-radius: 5px; cursor: pointer; background: #ff4444; color: #fff; }
+
+.search-result-item { display: flex; align-items: center; margin-top: 10px; padding: 5px; background: rgba(0,0,0,0.5); border-radius: 5px; cursor: pointer; transition: 0.2s; }
+.search-result-item:hover { background: rgba(255,68,68,0.6); }
+.search-result-item img { width: 80px; height: 60px; object-fit: cover; margin-right: 10px; border-radius: 3px; }
+.search-result-info h5 { margin: 0; font-size: 14px; }
+
+#youtubePlayer { margin-top: 20px; display: none; flex-direction: column; align-items: center; }
+#youtubePlayer.active { display: flex; }
+audio { width: 100%; margin-top: 10px; }
+
+#youtubeStatus { margin-top: 10px; }
+#popup { position: fixed; top: 20px; right: 20px; background: #ff4444; color: #fff; padding: 10px; border-radius: 5px; display: none; }
+</style>
+</head>
+<body>
+
+<video id="bg-video" autoplay muted loop>
+    <source src="https://files.catbox.moe/zieukq.mp4" type="video/mp4">
+</video>
+<div id="overlay"></div>
+
+<div id="main">
+    <h1 class="honk">🎵 YouTube Downloader & Player</h1>
+
+    <div id="youtube-section">
+        <input type="text" id="youtubeQuery" placeholder="Cari lagu / video YouTube">
+        <button id="searchYoutubeBtn">Cari</button>
+        <div id="youtubeStatus"></div>
+        <div id="youtubeResults"></div>
+
+        <div id="youtubePlayer">
+            <h3 id="youtubeTitle"></h3>
+            <audio id="youtubeAudio" controls></audio>
+            <div style="margin-top: 5px;">
+                <button id="youtubePlayPauseBtn">Play</button>
+                <button id="youtubeDownloadBtn">Download MP3</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="popup"></div>
+
+<script>
+let youtubeQuery = document.getElementById('youtubeQuery');
+let searchYoutubeBtn = document.getElementById('searchYoutubeBtn');
+let youtubeResults = document.getElementById('youtubeResults');
+let youtubeStatus = document.getElementById('youtubeStatus');
+let youtubePlayer = document.getElementById('youtubePlayer');
+let youtubeTitle = document.getElementById('youtubeTitle');
+let youtubeAudio = document.getElementById('youtubeAudio');
+let youtubePlayPauseBtn = document.getElementById('youtubePlayPauseBtn');
+let youtubeDownloadBtn = document.getElementById('youtubeDownloadBtn');
+let popup = document.getElementById('popup');
+
+let currentYoutubeAudio = null;
+let currentYoutubeData = null;
+
+function showYoutubePopup(title, message) {
+    popup.innerHTML = `<strong>${title}</strong><br>${message}`;
+    popup.style.display = 'block';
+    setTimeout(() => { popup.style.display = 'none'; }, 2500);
+}
+
+async function searchYoutube() {
+    const query = youtubeQuery.value.trim();
+    if (!query) return showYoutubePopup("Error", "Masukkan kata kunci dulu!");
+
+    youtubeStatus.innerHTML = 'Mencari...';
+    youtubeResults.innerHTML = '';
+    youtubePlayer.classList.remove('active');
+
+    try {
+        const res = await fetch(`https://api.siputzx.my.id/api/s/youtube?query=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        const results = data?.data;
+        if (!results || !results.length) {
+            youtubeStatus.innerHTML = 'Tidak ada hasil ditemukan';
+            return;
+        }
+        displayYoutubeResults(results);
+        youtubeStatus.innerHTML = `Ditemukan ${results.length} hasil`;
+    } catch (err) {
+        console.error(err);
+        youtubeStatus.innerHTML = `Gagal mencari: ${err.message}`;
+    }
+}
+
+function displayYoutubeResults(results) {
+    youtubeResults.innerHTML = "";
+    results.forEach((res) => {
+        const thumbnail = res.thumbnail?.url || res.thumbnail?.[0]?.url || res.thumbnails?.[0]?.url || res.thumbnail || "https://via.placeholder.com/80x60?text=No+Thumb";
+        const item = document.createElement("div");
+        item.className = "search-result-item";
+        item.innerHTML = `<img src="${thumbnail}" alt="thumb"><div class="search-result-info"><h5>${res.title}</h5></div>`;
+        item.addEventListener("click", () => playYoutubeMusic(res));
+        youtubeResults.appendChild(item);
+    });
+}
+
+async function playYoutubeMusic(data) {
+    youtubeStatus.innerHTML = 'Mengambil audio...';
+    try {
+        const res = await fetch(`https://restapi-v2.simplebot.my.id/download/ytmp3?url=${encodeURIComponent(data.url)}`);
+        const js = await res.json();
+        const audioUrl = js?.result;
+        if (!audioUrl) throw new Error("URL audio tidak ditemukan");
+
+        currentYoutubeAudio = youtubeAudio;
+        currentYoutubeData = data;
+
+        youtubeTitle.textContent = data.title;
+        youtubePlayer.classList.add("active");
+        youtubeStatus.innerHTML = `Siap diputar: ${data.title}`;
+    } catch (err) {
+        console.error(err);
+        youtubeStatus.innerHTML = `Gagal memutar: ${err.message}`;
+    }
+}
+
+function toggleYoutubePlayPause() {
+    if (!currentYoutubeAudio) return;
+    if (currentYoutubeAudio.paused) {
+        currentYoutubeAudio.play();
+        youtubePlayPauseBtn.textContent = "Pause";
+    } else {
+        currentYoutubeAudio.pause();
+        youtubePlayPauseBtn.textContent = "Play";
+    }
+}
+
+function downloadYoutubeMusic() {
+    if (!currentYoutubeAudio || !currentYoutubeData) return showYoutubePopup("Error", "Tidak ada lagu yang sedang diputar");
+    const link = document.createElement('a');
+    link.href = currentYoutubeAudio.src;
+    link.download = `${currentYoutubeData.title}.mp3`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showYoutubePopup("Berhasil", `Mengunduh: ${currentYoutubeData.title}`);
+}
+
+searchYoutubeBtn.addEventListener('click', searchYoutube);
+youtubeQuery.addEventListener('keypress', e => { if (e.key === 'Enter') searchYoutube(); });
+youtubePlayPauseBtn.addEventListener('click', toggleYoutubePlayPause);
+youtubeDownloadBtn.addEventListener('click', downloadYoutubeMusic);
+</script>
+
+</body>
+</html>
