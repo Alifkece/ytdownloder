@@ -3,16 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YouTube Audio Downloader</title>
+<title>Spotify Downloader</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <style>
-/* === STYLE ASLI TIDAK DIUBAH === */
 :root{
 --bg:#000;--text:#fff;--muted:#aaa;
---primary:#ff0000;--secondary:#AD4AE7;
+--primary:#1DB954;--secondary:#AD4AE7;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
 body{
@@ -96,16 +95,6 @@ margin-top:15px;
 display:inline-block;margin-top:15px;
 color:#00ff88;font-weight:bold;text-decoration:none
 }
-
-.info ul{margin-left:20px}
-.info li{margin-bottom:8px}
-
-.note{
-margin-top:15px;
-background:rgba(173,74,231,.1);
-border-left:4px solid #fff900;
-padding:15px;border-radius:8px
-}
 </style>
 </head>
 
@@ -117,35 +106,38 @@ padding:15px;border-radius:8px
 </div>
 
 <div class="header">
-<h1 class="title">YouTube Audio Downloader</h1>
+<h1 class="title">Spotify Downloader</h1>
 <p class="subtitle">Powered By Aliftzycrt🍓</p>
 </div>
 
 <div class="section">
 <h2 class="section-title">
-<i class="fas fa-music"></i> Download Audio
+<i class="fab fa-spotify"></i> Download Lagu Spotify
 </h2>
 
 <label class="label">
-<i class="fas fa-link"></i> Link YouTube
+<i class="fas fa-link"></i> Link Spotify
 </label>
-<input type="text" id="ytlink" class="input" placeholder="Tempel link YouTube di sini...">
+<input type="text" id="slink" class="input" placeholder="Tempel link Spotify di sini...">
 
-<button class="btn" onclick="downloadAudio()">
-<i class="fas fa-download"></i> Ambil Audio
+<button class="btn" onclick="downloadSpotify()">
+<i class="fas fa-download"></i> Ambil Lagu
 </button>
 
 <div class="loading" id="loading">
-<i class="fas fa-spinner fa-spin"></i> Mengambil audio...
+<i class="fas fa-spinner fa-spin"></i> Mengambil lagu...
 </div>
 </div>
 
 <div class="section result-area" id="resultArea">
 <h2 class="section-title">
-<i class="fas fa-check-circle"></i> Hasil Audio
+<i class="fas fa-check-circle"></i> Hasil Lagu
 </h2>
 
-<img id="thumb">
+<img id="cover">
+<h3 id="title"></h3>
+<p id="artist" style="color:#aaa;"></p>
+
 <audio id="player" controls></audio>
 <br>
 <a id="download" class="download" target="_blank">
@@ -153,47 +145,30 @@ padding:15px;border-radius:8px
 </a>
 </div>
 
-<div class="section info">
-<h2 class="section-title">
-<i class="fas fa-info-circle"></i> Cara Menggunakan
-</h2>
-
-<ul>
-<li>Salin link video YouTube</li>
-<li>Tempel ke kolom input</li>
-<li>Klik <b>Ambil Audio</b></li>
-<li>Tunggu proses selesai</li>
-<li>Audio bisa langsung diputar atau didownload</li>
-</ul>
-
-<div class="note">
-<i class="fas fa-lightbulb"></i>
-<b>Catatan:</b> Jika tidak bisa download, kemungkinan API sedang limit atau diblokir.
-</div>
-</div>
-
 </div>
 
 <script>
-function downloadAudio(){
-const link=document.getElementById("ytlink").value;
-if(!link){alert("Masukkan link YouTube dulu");return;}
+function downloadSpotify(){
+const link=document.getElementById("slink").value;
+if(!link){alert("Masukkan link Spotify dulu");return;}
 
 loading.style.display="block";
 resultArea.style.display="none";
 
-fetch(`https://api.vreden.my.id/api/v1/download/youtube/audio?url=${encodeURIComponent(link)}&quality=128`)
+fetch(`https://api.vreden.my.id/api/v1/download/spotify?url=${encodeURIComponent(link)}`)
 .then(res=>res.json())
 .then(data=>{
-if(!data.result){alert("Gagal ambil audio");return;}
+if(!data.status){alert("Gagal ambil lagu");return;}
 
-thumb.src=data.result.thumbnail;
+cover.src=data.result.cover_url;
+title.innerText=data.result.title;
+artist.innerText=data.result.artists;
 player.src=data.result.download;
 download.href=data.result.download;
 
 resultArea.style.display="block";
 })
-.catch(()=>alert("Terjadi kesalahan"))
+.catch(()=>alert("Terjadi kesalahan / CORS error"))
 .finally(()=>loading.style.display="none");
 }
 </script>
