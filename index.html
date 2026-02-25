@@ -3,409 +3,200 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YouTube Downloader & Player | Aliftzy</title>
+<title>YouTube Audio Downloader</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
 <style>
-@import url('https://fonts.cdnfonts.com/css/honk');
-body, html {
-  margin:0; padding:0;
-  font-family: Arial, sans-serif;
-  height: 100%;
-  overflow-x: hidden;
-  background:#000;
-  color:#fff;
+/* === STYLE ASLI TIDAK DIUBAH === */
+:root{
+--bg:#000;--text:#fff;--muted:#aaa;
+--primary:#ff0000;--secondary:#AD4AE7;
 }
-h1.honk {
-  font-family: "Honk", system-ui;
-  color: #00bfff;
-  text-shadow: 2px 2px 5px #000;
-  text-align:center;
-  margin-top:20px;
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{
+background:
+radial-gradient(circle at 20% 20%,rgba(255,255,255,.1),transparent 30%),
+radial-gradient(circle at 80% 10%,rgba(255,255,255,.08),transparent 25%),
+radial-gradient(circle at 50% 90%,rgba(255,255,255,.05),transparent 30%),
+var(--bg);
+color:var(--text);min-height:100vh;padding:20px;
+}
+.container{max-width:1100px;margin:auto}
+
+.profile-wrapper{
+width:150px;height:150px;border-radius:50%;
+margin:0 auto 25px;padding:5px;
+background:linear-gradient(135deg,var(--primary),var(--secondary));
+box-shadow:0 0 25px rgba(173,74,231,.5);
+animation:glow 4s infinite alternate
+}
+.profile-wrapper video{
+width:100%;height:100%;border-radius:50%;object-fit:cover
+}
+@keyframes glow{
+0%{box-shadow:0 0 15px var(--primary)}
+100%{box-shadow:0 0 30px var(--secondary)}
 }
 
-#bg-video {
-  position: fixed; top:0; left:0;
-  width:100%; height:100%;
-  object-fit:cover;
-  z-index: -2;
+.header{text-align:center;margin-bottom:30px}
+.title{font-family:'Orbitron',sans-serif;font-size:36px;font-weight:800}
+.subtitle{color:var(--muted)}
+
+.section{
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(15px);
+border:1px solid rgba(255,255,255,.15);
+border-radius:18px;padding:28px;
+margin-bottom:30px;position:relative
 }
-#overlay {
-  position: fixed; top:0; left:0;
-  width:100%; height:100%;
-  background: rgba(0,0,0,0.5);
-  z-index: -1;
+.section::before{
+content:'';position:absolute;top:0;left:0;right:0;height:3px;
+background:linear-gradient(90deg,var(--primary),var(--secondary))
 }
 
-/* --- Profile Video --- */
-#profile-container {
-  display:flex; flex-direction:column;
-  align-items:center;
-  margin-top:20px;
-  z-index:1;
-}
-#profile-video {
-  width:120px; height:120px;
-  border-radius:50%;
-  overflow:hidden;
-  box-shadow:0 0 20px #00bfff;
-  margin-bottom:10px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  animation: float 3s ease-in-out infinite;
-}
-#profile-video video{
-  width:100%; height:100%;
-  object-fit:cover;
-  aspect-ratio:1/1;
-  border-radius:50%;
-}
-@keyframes float {
-  0%,100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+.section-title{
+font-family:'Orbitron',sans-serif;
+font-size:22px;margin-bottom:20px;
+display:flex;align-items:center;gap:10px
 }
 
-/* --- Search bar and Player UI --- */
-#main { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; color: #fff; padding: 10px; }
-
-.search-bar {
-  display:flex;
-  width: 90%; max-width: 400px;
-  border: 2px solid #00bfff;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 15px;
-}
-.search-bar input[type="text"] {
-  flex:1; padding:10px;
-  border:none; outline:none;
-  background:transparent;
-  color:#fff; font-size:14px;
-}
-.search-bar button {
-  padding: 0 15px;
-  background:#00bfff; color:#000;
-  border:none; border-left:2px solid #fff;
-  font-weight:bold; cursor:pointer;
-  transition:0.3s;
-}
-.search-bar button:hover { background:#1ed760; color:#fff; }
-
-.search-result-item {
-  display:flex; align-items:center;
-  margin-top:8px; padding:5px;
-  background: rgba(0,0,40,0.5);
-  border-radius:5px; cursor:pointer;
-  transition:0.2s;
-}
-.search-result-item:hover {
-  background: rgba(0,191,255,0.6);
-  transform: scale(1.02);
-}
-.search-result-item img {
-  width:80px; height:60px;
-  object-fit:cover;
-  margin-right:10px; border-radius:5px;
-}
-.search-result-info h5 {
-  margin:0; font-size:13px;
-  color:#00bfff;
-  word-break: break-word;
+.label{margin-bottom:8px;font-weight:600;color:#ddd}
+.input{
+width:100%;padding:12px;
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.2);
+border-radius:12px;color:#fff;margin-bottom:10px
 }
 
-#youtubePlayer {
-  display:none;
-  flex-direction: column;
-  align-items:center;
-  background: rgba(0,15,40,0.9);
-  padding:10px; border-radius:20px;
-  box-shadow:0 0 20px rgba(0,191,255,0.5);
-  width:95%; max-width:360px;
-  margin-bottom:20px;
-}
-#youtubePlayer.active{display:flex;}
-#youtubeTitle { font-size:14px; color:#00bfff; text-align:center; margin-bottom:5px; word-break:break-word;}
-#youtubeTime { font-size:12px; color:#00bfff; text-align:center; margin-bottom:5px; }
-
-.player-controls { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; width:100%; margin-bottom:5px;}
-.play-btn, #youtubeDownloadBtn {
-  padding:8px 12px; border-radius:10px;
-  font-size:13px; font-weight:bold;
-  cursor:pointer;
-  background:#00bfff; color:#000; border:none;
-  transition:0.3s;
-}
-.play-btn:hover, #youtubeDownloadBtn:hover { background:#1ed760; color:#fff; }
-
-.timeline {
-  width:100%; height:10px;
-  background: rgba(0,191,255,0.2);
-  border-radius:5px; cursor:pointer;
-  position:relative; margin-bottom:5px;
-}
-.timeline-progress {
-  height:100%; width:0%;
-  background:#00bfff;
-  border-radius:5px;
-  box-shadow:0 0 10px #00bfff;
+.btn{
+width:100%;padding:14px;
+background:linear-gradient(135deg,var(--primary),var(--secondary));
+border:none;border-radius:12px;
+color:#fff;font-weight:bold;cursor:pointer
 }
 
-.equalizer {
-  display:flex; align-items:flex-end;
-  justify-content:center; gap:3px;
-  height:18px; margin-bottom:5px;
-}
-.bar {
-  width:4px; background:#00bfff;
-  border-radius:3px;
-  box-shadow:0 0 8px #00bfff;
-  animation:bounce 1s infinite ease-in-out paused;
-}
-.bar:nth-child(1){animation-delay:0s;}
-.bar:nth-child(2){animation-delay:0.15s;}
-.bar:nth-child(3){animation-delay:0.3s;}
-.bar:nth-child(4){animation-delay:0.45s;}
-.bar:nth-child(5){animation-delay:0.6s;}
-@keyframes bounce{
-  0%,100%{height:4px;opacity:0.5;}
-  50%{height:18px;opacity:1;}
+.loading{
+display:none;margin-top:15px;
+color:var(--secondary);text-align:center
 }
 
-#youtubeStatus { margin-bottom:10px; text-align:center; color:#00bfff; }
-#popup {
-  position: fixed; top: 15px; right: 15px;
-  background:#00bfff; color:#000;
-  padding:8px 10px; border-radius:8px;
-  display:none; font-weight:bold;
-  box-shadow:0 0 15px #00bfff;
-  animation: fadein 0.25s ease;
-}
-@keyframes fadein {
-  from{opacity:0; transform:translateY(-10px);}
-  to{opacity:1; transform:translateY(0);}
+.result-area{display:none}
+.result-area img{
+max-width:100%;border-radius:12px;margin-top:15px
 }
 
-@media screen and (max-width:480px){
-  .search-bar{width:95%;}
-  input[type="text"]{font-size:13px;}
-  button{font-size:13px;padding:8px 10px;}
-  #youtubeTitle{font-size:13px;}
-  #youtubeTime{font-size:11px;}
-  .timeline{height:12px;}
-  .bar{width:3px;height:15px;}
-  .search-result-item img{width:70px;height:50px;}
+audio{
+width:100%;
+margin-top:15px;
+}
+
+.download{
+display:inline-block;margin-top:15px;
+color:#00ff88;font-weight:bold;text-decoration:none
+}
+
+.info ul{margin-left:20px}
+.info li{margin-bottom:8px}
+
+.note{
+margin-top:15px;
+background:rgba(173,74,231,.1);
+border-left:4px solid #fff900;
+padding:15px;border-radius:8px
 }
 </style>
 </head>
+
 <body>
+<div class="container">
 
-<video id="bg-video" autoplay muted loop>
-  <source src="https://files.catbox.moe/l9zw30.mp4" type="video/mp4">
-</video>
-<div id="overlay"></div>
-
-<div id="profile-container">
-  <div id="profile-video">
-    <video autoplay muted loop playsinline>
-      <source src="https://files.catbox.moe/avjmc6.mp4" type="video/mp4">
-    </video>
-  </div>
-  <h1 class="honk">🎵 Aliftzy Music</h1>
+<div class="profile-wrapper">
+<video src="https://files.catbox.moe/84lt73.mp4" autoplay loop muted playsinline></video>
 </div>
 
-<div id="main">
-  <div id="youtube-section">
-    <div class="search-bar">
-      <input type="text" id="youtubeQuery" placeholder="Cari lagu / video YouTube">
-      <button id="searchYoutubeBtn">Cari</button>
-    </div>
-    <div id="youtubeStatus"></div>
-    <div id="youtubeResults"></div>
-
-    <div id="youtubePlayer">
-      <h3 id="youtubeTitle"></h3>
-      <div id="youtubeTime">00:00 / 00:00</div>
-      <div class="player-controls">
-        <button class="play-btn" id="youtubePlayPauseBtn">Play</button>
-        <button id="youtubeDownloadBtn">Download MP3</button>
-      </div>
-      <div class="timeline" id="timeline">
-        <div class="timeline-progress" id="progress"></div>
-      </div>
-      <div class="equalizer" id="equalizer">
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-      </div>
-      <audio id="youtubeAudio" preload="auto"></audio>
-    </div>
-  </div>
+<div class="header">
+<h1 class="title">YouTube Audio Downloader</h1>
+<p class="subtitle">Powered By Aliftzycrt🍓</p>
 </div>
 
-<div id="popup"></div>
+<div class="section">
+<h2 class="section-title">
+<i class="fas fa-music"></i> Download Audio
+</h2>
+
+<label class="label">
+<i class="fas fa-link"></i> Link YouTube
+</label>
+<input type="text" id="ytlink" class="input" placeholder="Tempel link YouTube di sini...">
+
+<button class="btn" onclick="downloadAudio()">
+<i class="fas fa-download"></i> Ambil Audio
+</button>
+
+<div class="loading" id="loading">
+<i class="fas fa-spinner fa-spin"></i> Mengambil audio...
+</div>
+</div>
+
+<div class="section result-area" id="resultArea">
+<h2 class="section-title">
+<i class="fas fa-check-circle"></i> Hasil Audio
+</h2>
+
+<img id="thumb">
+<audio id="player" controls></audio>
+<br>
+<a id="download" class="download" target="_blank">
+<i class="fas fa-download"></i> Download MP3
+</a>
+</div>
+
+<div class="section info">
+<h2 class="section-title">
+<i class="fas fa-info-circle"></i> Cara Menggunakan
+</h2>
+
+<ul>
+<li>Salin link video YouTube</li>
+<li>Tempel ke kolom input</li>
+<li>Klik <b>Ambil Audio</b></li>
+<li>Tunggu proses selesai</li>
+<li>Audio bisa langsung diputar atau didownload</li>
+</ul>
+
+<div class="note">
+<i class="fas fa-lightbulb"></i>
+<b>Catatan:</b> Jika tidak bisa download, kemungkinan API sedang limit atau diblokir.
+</div>
+</div>
+
+</div>
 
 <script>
-const youtubeQuery = document.getElementById('youtubeQuery');
-const searchYoutubeBtn = document.getElementById('searchYoutubeBtn');
-const youtubeResults = document.getElementById('youtubeResults');
-const youtubeStatus = document.getElementById('youtubeStatus');
-const youtubePlayer = document.getElementById('youtubePlayer');
-const youtubeTitle = document.getElementById('youtubeTitle');
-const youtubeAudio = document.getElementById('youtubeAudio');
-const youtubePlayPauseBtn = document.getElementById('youtubePlayPauseBtn');
-const youtubeDownloadBtn = document.getElementById('youtubeDownloadBtn');
-const progress = document.getElementById('progress');
-const timeline = document.getElementById('timeline');
-const youtubeTime = document.getElementById('youtubeTime');
-const bars = document.querySelectorAll('.bar');
-const popup = document.getElementById('popup');
+function downloadAudio(){
+const link=document.getElementById("ytlink").value;
+if(!link){alert("Masukkan link YouTube dulu");return;}
 
-let currentYoutubeAudio = null;
-let currentYoutubeData = null;
+loading.style.display="block";
+resultArea.style.display="none";
 
-function showYoutubePopup(title, message){
-  popup.innerHTML = `<strong>${title}</strong><br>${message}`;
-  popup.style.display = 'block';
-  if (popup._hideTimer) clearTimeout(popup._hideTimer);
-  popup._hideTimer = setTimeout(()=>{ popup.style.display='none'; }, 2500);
+fetch(`https://api.vreden.my.id/api/v1/download/youtube/audio?url=${encodeURIComponent(link)}&quality=128`)
+.then(res=>res.json())
+.then(data=>{
+if(!data.result){alert("Gagal ambil audio");return;}
+
+thumb.src=data.result.thumbnail;
+player.src=data.result.download;
+download.href=data.result.download;
+
+resultArea.style.display="block";
+})
+.catch(()=>alert("Terjadi kesalahan"))
+.finally(()=>loading.style.display="none");
 }
-
-/* --- Search function --- */
-async function searchYoutube(){
-  const query = youtubeQuery.value.trim();
-  if(!query) return showYoutubePopup("Error","Masukkan kata kunci dulu!");
-  youtubeStatus.innerHTML = 'Mencari…';
-  youtubeResults.innerHTML = '';
-  youtubePlayer.classList.remove('active');
-
-  try{
-    const res = await fetch(`https://api.siputzx.my.id/api/s/youtube?query=${encodeURIComponent(query)}`);
-    const data = await res.json();
-    const results = data?.data;
-    if(!results || !results.length){ youtubeStatus.innerHTML='Tidak ada hasil ditemukan'; return; }
-    youtubeStatus.innerHTML = `Ditemukan ${results.length} hasil`;
-    youtubeResults.innerHTML = '';
-    showYoutubePopup("Success","Found " + results.length + " songs 🔥");
-    results.forEach(itemData=>{
-      const thumb = itemData.thumbnail?.url || itemData.thumbnails?.[0]?.url || itemData.thumbnail || "https://via.placeholder.com/80x60?text=No+Thumb";
-      const item = document.createElement("div");
-      item.className = "search-result-item";
-      item.innerHTML = `<img src="${thumb}" alt="thumb"><div class="search-result-info"><h5>${itemData.title}</h5></div>`;
-      item.addEventListener('click', ()=> playYoutubeMusic(itemData));
-      youtubeResults.appendChild(item);
-    });
-  }catch(err){
-    console.error(err);
-    youtubeStatus.innerHTML = `Gagal mencari: ${err.message}`;
-  }
-}
-
-/* --- Play audio --- */
-async function playYoutubeMusic(data){
-  youtubeAudio.pause();
-  youtubeAudio.removeAttribute('src');
-  youtubeAudio.load();
-  youtubeStatus.innerHTML = 'Mengambil audio…';
-  youtubePlayer.classList.remove('active');
-
-  try{
-    const res = await fetch(`https://restapi-v2.simplebot.my.id/download/ytmp3?url=${encodeURIComponent(data.url)}`);
-    const js = await res.json();
-    const audioUrl = js?.result;
-    if(!audioUrl) throw new Error("URL audio tidak ditemukan");
-
-    currentYoutubeAudio = youtubeAudio;
-    currentYoutubeData = data;
-    youtubeAudio.src = audioUrl;
-    youtubeAudio.load();
-    youtubeTitle.textContent = data.title;
-
-    const updateReady = () => {
-      youtubeStatus.innerHTML = `Playing: ${data.title}`;
-      showYoutubePopup("🎶 " + data.title, "ready to play!");
-      youtubePlayer.classList.add('active');
-      bars.forEach(bar => bar.style.animationPlayState = 'running');
-    };
-
-    youtubeAudio.addEventListener('canplaythrough', () => {
-      youtubeAudio.play().then(updateReady).catch(updateReady);
-    }, { once:true });
-
-    youtubeAudio.addEventListener('playing', updateReady, { once:true });
-
-    updateProgress();
-  }catch(err){
-    youtubeStatus.innerHTML = `Gagal memutar: ${err.message}`;
-    console.error(err);
-  }
-}
-
-/* --- Controls --- */
-function toggleYoutubePlayPause(){
-  if(!currentYoutubeAudio) return;
-  if(currentYoutubeAudio.paused){
-    currentYoutubeAudio.play();
-    youtubePlayPauseBtn.textContent='Pause';
-    youtubeStatus.innerHTML = `Playing: ${currentYoutubeData?.title}`;
-    bars.forEach(bar=>bar.style.animationPlayState='running');
-  } else {
-    currentYoutubeAudio.pause();
-    youtubePlayPauseBtn.textContent='Play';
-    youtubeStatus.innerHTML = `Paused: ${currentYoutubeData?.title}`;
-    bars.forEach(bar=>bar.style.animationPlayState='paused');
-  }
-}
-function downloadYoutubeMusic(){
-  if(!currentYoutubeAudio || !youtubeAudio.src) return showYoutubePopup("Error","Tidak ada lagu yang sedang diputar");
-  const link = document.createElement('a');
-  link.href = youtubeAudio.src;
-  link.download = `${currentYoutubeData.title}.mp3`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  showYoutubePopup("Downloaded", currentYoutubeData.title);
-}
-
-/* --- Timeline --- */
-timeline.addEventListener('click', e=>{
-  if(!currentYoutubeAudio || isNaN(currentYoutubeAudio.duration)) return;
-  const rect = timeline.getBoundingClientRect();
-  const percent = (e.clientX - rect.left)/rect.width;
-  currentYoutubeAudio.currentTime = percent * currentYoutubeAudio.duration;
-});
-
-youtubeAudio.addEventListener('timeupdate', updateProgress);
-youtubeAudio.addEventListener('ended', ()=>{
-  youtubePlayPauseBtn.textContent='Play';
-  youtubeStatus.innerHTML = `Ended: ${currentYoutubeData?.title}`;
-  bars.forEach(bar=>bar.style.animationPlayState='paused');
-});
-youtubeAudio.addEventListener('pause', ()=>{
-  if(!youtubeAudio.ended){
-    youtubePlayPauseBtn.textContent='Play';
-    youtubeStatus.innerHTML = `Paused: ${currentYoutubeData?.title}`;
-    bars.forEach(bar=>bar.style.animationPlayState='paused');
-  }
-});
-
-function updateProgress(){
-  if(!currentYoutubeAudio || isNaN(currentYoutubeAudio.duration)) {
-    progress.style.width = '0%';
-    youtubeTime.textContent = '00:00 / 00:00';
-    return;
-  }
-  const pct = (currentYoutubeAudio.currentTime / currentYoutubeAudio.duration) * 100;
-  progress.style.width = pct + '%';
-  youtubeTime.textContent = `${formatTime(currentYoutubeAudio.currentTime)} / ${formatTime(currentYoutubeAudio.duration)}`;
-}
-function formatTime(s){
-  if(isNaN(s)) return "00:00";
-  const m=Math.floor(s/60); const sec=Math.floor(s%60);
-  return `${m<10?'0':''}${m}:${sec<10?'0':''}${sec}`;
-}
-
-/* --- Event listeners --- */
-searchYoutubeBtn.addEventListener('click', searchYoutube);
-youtubeQuery.addEventListener('keypress', e=>{ if(e.key==='Enter') searchYoutube(); });
-youtubePlayPauseBtn.addEventListener('click', toggleYoutubePlayPause);
-youtubeDownloadBtn.addEventListener('click', downloadYoutubeMusic);
 </script>
+
 </body>
 </html>
